@@ -1,13 +1,3 @@
-terraform {
-  cloud {
-    organization = "flawedlogic"
-
-    workspaces {
-      name = "dnd-remote"
-    }
-  }
-}
-
 provider "aws" {
   region     = "us-east-1" # Choose the region closest to your on-premises server
   access_key = var.access_key
