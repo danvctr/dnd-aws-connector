@@ -123,7 +123,7 @@ module "alb" {
       protocol    = "HTTP"
       port        = 80
       target_type = "instance"
-      target_id   = aws_instance.ubuntu_server.id
+      target_id   = aws_instance.nginx_server.id
     }
   }
 
@@ -247,7 +247,7 @@ data "aws_ami" "ubuntu" {
 }
 
 #Build EC2 instance in Public Subnet
-resource "aws_instance" "ubuntu_server" {
+resource "aws_instance" "nginx_server" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.public_subnets["public_subnet_1"].id
@@ -261,13 +261,24 @@ resource "aws_instance" "ubuntu_server" {
   }
 
   ### TODO Download and configure nginx -- create a Bash script (place in GitHub repo) to config nginx and use TF vars for the IP and port in args
-  provisioner "remote-exec" {
-    inline = [
-      "sudo rm -rf /tmp",
-      "sudo git clone https://github.com/hashicorp/demo-terraform-101 /tmp",
-      "sudo sh /tmp/assets/setup-web.sh",
-    ]
-  }
+#   provisioner "remote-exec" {
+#     inline = [
+#       "sudo rm -rf /tmp",
+#       "sudo apt update",
+#       "sudo apt install -y nginx",
+#       # Download config script here
+#       "systemctl start nginx",
+#       # "sudo git clone https://github.com/hashicorp/demo-terraform-101 /tmp",
+#       # "sudo sh /tmp/assets/setup-web.sh",
+#     ]
+#   }
+
+  user_data = <<-EOF
+             #!/bin/bash
+             apt-get update
+             apt-get install -y nginx
+             systemctl start nginx
+             EOF
 
   tags = {
     Name = "DnD ngnix Proxy Server"
